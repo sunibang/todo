@@ -1,23 +1,18 @@
 package main
 
 import (
+	"fmt"
+	"net/http"
 	"net/http/httptest"
+	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
+
+	"testing"
 
 	"github.com/golang/mock/gomock"
-	"testing"
 )
-
-type todo struct {
-	ID        string `json:"id"`
-	Item      string `json:"item"`
-	Completed bool   `json:"completed"`
-}
-
-var todos = []todo{
-	{ID: "1", Item: "Clean Room", Completed: false},
-	{ID: "2", Item: "Read book", Completed: false},
-	{ID: "3", Item: "Record Video", Completed: false},
-}
 
 func TestAddTodo(t *testing.T) {
 
@@ -26,10 +21,11 @@ func TestAddTodo(t *testing.T) {
 func TestGetTodo(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	server := newTestServer(t, store)
+
+	server := newTestServer(t)
 	recorder := httptest.NewRecorder()
 
-	url := fmt.Sprintf("/accounts/%d", tc.accountID)
+	url := fmt.Sprintf("/todo/%d", 1)
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	require.NoError(t, err)
 	server.router.ServeHTTP(recorder, request)
@@ -38,4 +34,17 @@ func TestGetTodo(t *testing.T) {
 
 func checkResponse(t *testing.T, recorder *httptest.ResponseRecorder) {
 	require.Equal(t, http.StatusBadRequest, recorder.Code)
+}
+
+func TestMain(m *testing.M) {
+	gin.SetMode(gin.TestMode)
+
+	os.Exit(m.Run())
+}
+
+func newTestServer(t *testing.T) *Server {
+	server, err := NewServer()
+	require.NoError(t, err)
+
+	return server
 }
