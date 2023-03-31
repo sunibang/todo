@@ -1,4 +1,4 @@
-module todo
+module github.com/sunibang/todo
 
 go 1.20
 
